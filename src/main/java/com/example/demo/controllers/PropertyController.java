@@ -32,7 +32,9 @@ public class PropertyController {
     // ==========================================
     // 🛡️ HELPER: Safe Data & Owner Verification Status
     // ==========================================
-    private Map<String, Object> makeSafeProperty(Property p) {
+    
+    // Browse page sathi short map (List dakhvnyasti)
+    private Map<String, Object> makeShortSafeProperty(Property p) {
         Map<String, Object> safeMap = new HashMap<>();
         safeMap.put("id", p.getId());
         safeMap.put("title", p.getTitle());
@@ -44,7 +46,6 @@ public class PropertyController {
         safeMap.put("images", p.getImages());
         safeMap.put("rooms", p.getRooms());
         
-        // 👇 FIX: Owner verified ahe ki nahi te frontend la pathavne (Blue Tick sathi)
         if (p.getOwner() != null) {
             safeMap.put("ownerId", p.getOwner().getId());
             safeMap.put("ownerVerified", p.getOwner().getVerified()); 
@@ -55,33 +56,33 @@ public class PropertyController {
         return safeMap;
     }
 
-    // 1. Sagle properties dakhvnyasathi (Browse Page) - 🔥 FAKT VERIFIED OWNERS CHE GHAR DAKHVA!
+    // 1. Sagle properties dakhvnyasathi (Browse Page) 
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> getAllProperties() {
         System.out.println("====== BROWSE PAGE NE SAGLE PROPERTIES MAGITLE ======");
         List<Map<String, Object>> safeProperties = propertyRepository.findAll()
                 .stream()
-                // HA AHE TO JADUCHA FILTER: Jar owner verified asel tarach list madhe theva!
                 .filter(p -> p.getOwner() != null && Boolean.TRUE.equals(p.getOwner().getVerified()))
-                .map(this::makeSafeProperty)
+                .map(this::makeShortSafeProperty) // List sathi chota map
                 .collect(Collectors.toList());
         return ResponseEntity.ok(safeProperties);
     }
 
-    // 2. ID varun ek property shodhnyasathi (View Details sathi)
+    // 👈 🟢 VIP FIX: Single Property ghetana PURNA DATA dakhvane (Owner Details sakt!)
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> getPropertyById(@PathVariable String id) {
+    public ResponseEntity<Property> getPropertyById(@PathVariable String id) {
+        // Aata aapan Map nahi, direct Property object pathvat ahot, 
+        // mhanje frontend la owner cha phone, firstName, avatar sagle bhetel!
         return propertyRepository.findById(id)
-                .map(p -> ResponseEntity.ok(makeSafeProperty(p)))
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     // 3. Eka specific malakachi (Owner) sagli ghar shodhnyasathi (My Properties)
     @GetMapping("/owner/{ownerId}")
     public ResponseEntity<List<Map<String, Object>>> getPropertiesByOwner(@PathVariable String ownerId) {
-        // Owner la matra tyachi sagli ghar dislit pahijet (chaha to verified aso kiva naso)
         List<Map<String, Object>> safeProperties = propertyRepository.findByOwnerId(ownerId)
-                .stream().map(this::makeSafeProperty).collect(Collectors.toList());
+                .stream().map(this::makeShortSafeProperty).collect(Collectors.toList());
         return ResponseEntity.ok(safeProperties);
     }
 
@@ -95,7 +96,7 @@ public class PropertyController {
         }
         property.setAvailable(true); 
         Property savedProperty = propertyRepository.save(property);
-        return ResponseEntity.ok(makeSafeProperty(savedProperty));
+        return ResponseEntity.ok(makeShortSafeProperty(savedProperty));
     }
 
     // 5. Property Update karnyasti
@@ -111,7 +112,7 @@ public class PropertyController {
                     if (updatedProperty.getRooms() > 0) existingProperty.setRooms(updatedProperty.getRooms());
 
                     Property savedProperty = propertyRepository.save(existingProperty);
-                    return ResponseEntity.ok(makeSafeProperty(savedProperty));
+                    return ResponseEntity.ok(makeShortSafeProperty(savedProperty));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }

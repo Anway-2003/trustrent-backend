@@ -78,19 +78,33 @@ public class UserController {
         return ResponseEntity.ok(savedUser);
     }
 
-    // User chi profile update karnyasti (Edit Profile)
+    // 👈 🟢 VIP FIX: User chi profile update karnyasti (Sagle fields add kele) 🟢
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUserProfile(@PathVariable String id, @RequestBody User updatedUser) {
+        System.out.println("====== PROFILE UPDATE REQUEST AALI (ID: " + id + ") ======");
+        
         return userRepository.findById(id).map(existingUser -> {
+            // Old fields
             if (updatedUser.getFirstName() != null) existingUser.setFirstName(updatedUser.getFirstName());
             if (updatedUser.getLastName() != null) existingUser.setLastName(updatedUser.getLastName());
             if (updatedUser.getPhone() != null) existingUser.setPhone(updatedUser.getPhone());
             if (updatedUser.getBio() != null) existingUser.setBio(updatedUser.getBio());
             if (updatedUser.getAvatar() != null) existingUser.setAvatar(updatedUser.getAvatar());
             
+            // 👈 MISSING FIELDS FIX KELA: City, Region, Country
+            if (updatedUser.getCity() != null) existingUser.setCity(updatedUser.getCity());
+            if (updatedUser.getRegion() != null) existingUser.setRegion(updatedUser.getRegion());
+            if (updatedUser.getCountry() != null) existingUser.setCountry(updatedUser.getCountry());
+            
+            // DB Madhe Save Maar!
             User savedUser = userRepository.save(existingUser);
+            System.out.println("✅ SUCCESS: Profile saved in PostgreSQL Database!");
+            
             return ResponseEntity.ok(savedUser);
-        }).orElse(ResponseEntity.notFound().build());
+        }).orElseGet(() -> {
+            System.out.println("❌ ERROR: User ID sapadla nahi Database madhe!");
+            return ResponseEntity.notFound().build();
+        });
     }
 
     // ADMIN ACTION: User la Verify / Unverify karne

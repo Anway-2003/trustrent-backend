@@ -59,6 +59,10 @@ public class User {
 
     @Column(name = "avatar", columnDefinition = "TEXT")
     private String avatar; 
+    
+    private String city;
+    private String region;
+    private String country;
 
     @PrePersist
     protected void onCreate() { createdAt = LocalDateTime.now(); }
@@ -83,4 +87,27 @@ public class User {
             this.role = UserRole.valueOf(roleName.toUpperCase());
         }
     }
+    public String getCity() {
+    return city;
+}
+
+public void setCity(String city) {
+    this.city = city;
+}
+
+public String getRegion() {
+    return region;
+}
+
+public void setRegion(String region) {
+    this.region = region;
+}
+
+public String getCountry() {
+    return country;
+}
+
+public void setCountry(String country) {
+    this.country = country;
+}
 }

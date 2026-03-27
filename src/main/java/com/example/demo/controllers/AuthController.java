@@ -50,10 +50,16 @@ public class AuthController {
                 safeUserData.put("firstName", user.getFirstName());
                 safeUserData.put("lastName", user.getLastName());
                 safeUserData.put("role", user.getRole() != null ? user.getRole().name() : "TENANT");
-                
-                // 👇 FIX: isVerified() kadhun getVerified() kela ahe
                 safeUserData.put("verified", user.getVerified()); 
-                safeUserData.put("token", "safe-jwt-token-123"); // Frontend la lagat hota
+                safeUserData.put("token", "safe-jwt-token-123"); 
+                
+                // 👈 🟢 VIP FIX: Missing fields add kele (He pathavle navhte login chya veli) 🟢
+                safeUserData.put("phone", user.getPhone());
+                safeUserData.put("bio", user.getBio());
+                safeUserData.put("city", user.getCity());
+                safeUserData.put("region", user.getRegion());
+                safeUserData.put("country", user.getCountry());
+                safeUserData.put("avatar", user.getAvatar());
                 
                 return ResponseEntity.ok(safeUserData); 
             } else {
@@ -73,6 +79,8 @@ public class AuthController {
             Map<String, Object> safeUserData = new HashMap<>();
             safeUserData.put("id", newUser.getId());
             safeUserData.put("email", newUser.getEmail());
+            safeUserData.put("firstName", newUser.getFirstName()); // Add kela
+            safeUserData.put("lastName", newUser.getLastName());   // Add kela
             safeUserData.put("role", newUser.getRole() != null ? newUser.getRole().name() : "TENANT");
             
             return ResponseEntity.ok(safeUserData);
