@@ -23,14 +23,14 @@ import com.example.demo.repositories.PropertyRepository;
 
 @RestController
 @RequestMapping("/api/properties")
-@CrossOrigin(origins = "http://localhost:3000") // Frontend la allow karnyasti
+@CrossOrigin(origins = "http://localhost:3000") 
 public class PropertyController {
 
     @Autowired
     private PropertyRepository propertyRepository;
 
     // ==========================================
-    // 🛡️ HELPER: Infinite Loop (Crash) thambavnyasathi
+    // 🛡️ HELPER: Safe Data & Owner Verification Status
     // ==========================================
     private Map<String, Object> makeSafeProperty(Property p) {
         Map<String, Object> safeMap = new HashMap<>();
@@ -44,25 +44,31 @@ public class PropertyController {
         safeMap.put("images", p.getImages());
         safeMap.put("rooms", p.getRooms());
         
-        // Owner ID safe paddhatine takne (User object avoid karun)
-        if (p.getOwnerId() != null) {
-            safeMap.put("ownerId", p.getOwnerId());
-        } else if (p.getOwner() != null) {
+        // 👇 FIX: Owner verified ahe ki nahi te frontend la pathavne (Blue Tick sathi)
+        if (p.getOwner() != null) {
             safeMap.put("ownerId", p.getOwner().getId());
+            safeMap.put("ownerVerified", p.getOwner().getVerified()); 
+        } else if (p.getOwnerId() != null) {
+            safeMap.put("ownerId", p.getOwnerId());
+            safeMap.put("ownerVerified", false);
         }
         return safeMap;
     }
 
-    // 1. Sagle properties dakhvnyasathi (Browse Page) - CRASH PROOF ✅
+    // 1. Sagle properties dakhvnyasathi (Browse Page) - 🔥 FAKT VERIFIED OWNERS CHE GHAR DAKHVA!
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> getAllProperties() {
         System.out.println("====== BROWSE PAGE NE SAGLE PROPERTIES MAGITLE ======");
         List<Map<String, Object>> safeProperties = propertyRepository.findAll()
-                .stream().map(this::makeSafeProperty).collect(Collectors.toList());
+                .stream()
+                // HA AHE TO JADUCHA FILTER: Jar owner verified asel tarach list madhe theva!
+                .filter(p -> p.getOwner() != null && Boolean.TRUE.equals(p.getOwner().getVerified()))
+                .map(this::makeSafeProperty)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(safeProperties);
     }
 
-    // 2. ID varun ek property shodhnyasathi (View Details sathi) - CRASH PROOF ✅
+    // 2. ID varun ek property shodhnyasathi (View Details sathi)
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getPropertyById(@PathVariable String id) {
         return propertyRepository.findById(id)
@@ -70,42 +76,34 @@ public class PropertyController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 3. Eka specific malakachi (Owner) sagli ghar shodhnyasathi (My Properties) - CRASH PROOF ✅
+    // 3. Eka specific malakachi (Owner) sagli ghar shodhnyasathi (My Properties)
     @GetMapping("/owner/{ownerId}")
     public ResponseEntity<List<Map<String, Object>>> getPropertiesByOwner(@PathVariable String ownerId) {
+        // Owner la matra tyachi sagli ghar dislit pahijet (chaha to verified aso kiva naso)
         List<Map<String, Object>> safeProperties = propertyRepository.findByOwnerId(ownerId)
                 .stream().map(this::makeSafeProperty).collect(Collectors.toList());
         return ResponseEntity.ok(safeProperties);
     }
 
-    // 4. Navin property save karnyasti (Add Property)
+    // 4. Navin property save karnyasti
     @PostMapping
     public ResponseEntity<Map<String, Object>> createProperty(@RequestBody Property property) {
-        System.out.println("====== NAVIN PROPERTY ADD HOTIYE ======");
-        
         if (property.getOwnerId() != null) {
             User dummyOwner = new User();
             dummyOwner.setId(property.getOwnerId());
             property.setOwner(dummyOwner); 
-            System.out.println("✅ SUCCESS: Owner attach jhala!");
-        } else {
-            System.out.println("🚨 DANGER: Owner ID aala nahi!");
         }
-
-        property.setAvailable(true); // Default true
+        property.setAvailable(true); 
         Property savedProperty = propertyRepository.save(property);
         return ResponseEntity.ok(makeSafeProperty(savedProperty));
     }
 
-    // 5. Property Update (Edit / Mark as Rented) karnyasti
+    // 5. Property Update karnyasti
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> updateProperty(@PathVariable String id, @RequestBody Property updatedProperty) {
-        System.out.println("====== UPDATE BUTTON DABLAAA ======");
-        
         return propertyRepository.findById(id)
                 .map(existingProperty -> {
                     existingProperty.setAvailable(updatedProperty.isAvailable());
-                    
                     if (updatedProperty.getTitle() != null) existingProperty.setTitle(updatedProperty.getTitle());
                     if (updatedProperty.getCity() != null) existingProperty.setCity(updatedProperty.getCity());
                     if (updatedProperty.getRegion() != null) existingProperty.setRegion(updatedProperty.getRegion());
@@ -113,13 +111,12 @@ public class PropertyController {
                     if (updatedProperty.getRooms() > 0) existingProperty.setRooms(updatedProperty.getRooms());
 
                     Property savedProperty = propertyRepository.save(existingProperty);
-                    System.out.println("✅ SUCCESS: Status Update Jhala!");
                     return ResponseEntity.ok(makeSafeProperty(savedProperty));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 6. Property Delete karnyasti
+    // 6. Delete property
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProperty(@PathVariable String id) {
         if (propertyRepository.existsById(id)) {
