@@ -102,21 +102,49 @@ public class PropertyController {
     // 5. Property Update karnyasti
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> updateProperty(@PathVariable String id, @RequestBody Property updatedProperty) {
+        System.out.println("====== PROPERTY UPDATE REQUEST AALI ======");
+        
         return propertyRepository.findById(id)
                 .map(existingProperty -> {
+                    // 1. Basic Fields
                     existingProperty.setAvailable(updatedProperty.isAvailable());
                     if (updatedProperty.getTitle() != null) existingProperty.setTitle(updatedProperty.getTitle());
                     if (updatedProperty.getCity() != null) existingProperty.setCity(updatedProperty.getCity());
                     if (updatedProperty.getRegion() != null) existingProperty.setRegion(updatedProperty.getRegion());
+                    if (updatedProperty.getType() != null) existingProperty.setType(updatedProperty.getType());
+                    if (updatedProperty.getDescription() != null) existingProperty.setDescription(updatedProperty.getDescription());
+                    
+                    // 👈 🟢 FIX: Address chi line (Save karnyasti)
+                    if (updatedProperty.getAddress() != null) existingProperty.setAddress(updatedProperty.getAddress());
+
+                    // 2. Number Fields
                     if (updatedProperty.getMonthlyRent() > 0) existingProperty.setMonthlyRent(updatedProperty.getMonthlyRent());
                     if (updatedProperty.getRooms() > 0) existingProperty.setRooms(updatedProperty.getRooms());
+                    if (updatedProperty.getBathrooms() > 0) existingProperty.setBathrooms(updatedProperty.getBathrooms());
+                    if (updatedProperty.getArea() > 0) existingProperty.setArea(updatedProperty.getArea());
+                    
+                    // 👈 🟢 FIX: Deposit chi line (Aadhi miss jhali hoti)
+                    if (updatedProperty.getDeposit() > 0) existingProperty.setDeposit(updatedProperty.getDeposit());
 
+                    // 3. Amenities (Booleans)
+                    existingProperty.setHasParking(updatedProperty.isHasParking());
+                    existingProperty.setFurnished(updatedProperty.isFurnished());
+                    existingProperty.setPetsAllowed(updatedProperty.isPetsAllowed());
+                    existingProperty.setHasGarden(updatedProperty.isHasGarden());
+
+                    // 4. Photos
+                    if (updatedProperty.getImages() != null && !updatedProperty.getImages().isEmpty()) {
+                        existingProperty.setImages(updatedProperty.getImages());
+                    }
+
+                    // Database madhe save maar!
                     Property savedProperty = propertyRepository.save(existingProperty);
+                    System.out.println("✅ SUCCESS: Property Updated in DB!");
+                    
                     return ResponseEntity.ok(makeShortSafeProperty(savedProperty));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
-
     // 6. Delete property
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProperty(@PathVariable String id) {
