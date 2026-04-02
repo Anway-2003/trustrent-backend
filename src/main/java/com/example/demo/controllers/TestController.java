@@ -10,6 +10,6 @@ public class TestController {
 
     @GetMapping("/hello")
     public String hello() {
-        return "TrustRent Backend ekdum barobar chalu aahe bhava! 🚀";
+        return "TrustRent Backend is proper Working! 🚀";
     }
 }

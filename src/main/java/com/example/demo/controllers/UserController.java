@@ -26,7 +26,7 @@ import com.example.demo.repositories.UserRepository;
 
 @RestController
 @RequestMapping("/api/users") 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost:3000", "https://trustrent-frontend.vercel.app"})
 public class UserController {
 
     @Autowired

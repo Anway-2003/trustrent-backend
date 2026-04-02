@@ -19,7 +19,7 @@ import com.example.demo.repositories.UserRepository;
 
 @RestController
 @RequestMapping("/api/messages")
-@CrossOrigin(origins = "http://localhost:3000") // Frontend sathi allow
+@CrossOrigin(origins = {"http://localhost:3000", "https://trustrent-frontend.vercel.app"})
 public class MessageController {
 
     @Autowired

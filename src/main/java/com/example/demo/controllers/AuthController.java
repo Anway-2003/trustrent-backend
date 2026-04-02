@@ -20,7 +20,7 @@ import com.example.demo.services.AuthService;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost:3000", "https://trustrent-frontend.vercel.app"})
 public class AuthController {
 
     @Autowired

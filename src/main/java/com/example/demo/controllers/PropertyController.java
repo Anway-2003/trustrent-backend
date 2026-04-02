@@ -23,7 +23,7 @@ import com.example.demo.repositories.PropertyRepository;
 
 @RestController
 @RequestMapping("/api/properties")
-@CrossOrigin(origins = "http://localhost:3000") 
+@CrossOrigin(origins = {"http://localhost:3000", "https://trustrent-frontend.vercel.app"}) 
 public class PropertyController {
 
     @Autowired
