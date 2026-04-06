@@ -64,6 +64,10 @@ public class User {
     private String region;
     private String country;
 
+    // 👇 नवीन: डॉक्युमेंट (Aadhaar/PAN) ची लिंक सेव्ह करण्यासाठी 👇
+    @Column(name = "gov_id_url", columnDefinition = "TEXT")
+    private String govIdUrl;
+
     @PrePersist
     protected void onCreate() { createdAt = LocalDateTime.now(); }
 
@@ -77,7 +81,7 @@ public class User {
     @com.fasterxml.jackson.annotation.JsonIgnore
     private Set<Property> savedProperties = new HashSet<>();
 
-    // 👇 MAIN FIX: 'boolean' ch 'Boolean' kela ahe. Aata NullPointerException yenar nahi! 👇
+    // MAIN FIX: 'boolean' ch 'Boolean' kela ahe. Aata NullPointerException yenar nahi!
     @Column(name = "verified")
     private Boolean verified = false; 
 
@@ -87,27 +91,17 @@ public class User {
             this.role = UserRole.valueOf(roleName.toUpperCase());
         }
     }
-    public String getCity() {
-    return city;
-}
 
-public void setCity(String city) {
-    this.city = city;
-}
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
 
-public String getRegion() {
-    return region;
-}
+    public String getRegion() { return region; }
+    public void setRegion(String region) { this.region = region; }
 
-public void setRegion(String region) {
-    this.region = region;
-}
+    public String getCountry() { return country; }
+    public void setCountry(String country) { this.country = country; }
 
-public String getCountry() {
-    return country;
-}
-
-public void setCountry(String country) {
-    this.country = country;
-}
+    // 👇 Lombok चा एरर येऊ नये म्हणून Gov ID च्या Custom Methods 👇
+    public String getGovIdUrl() { return govIdUrl; }
+    public void setGovIdUrl(String govIdUrl) { this.govIdUrl = govIdUrl; }
 }

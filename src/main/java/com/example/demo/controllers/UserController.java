@@ -51,9 +51,11 @@ public class UserController {
             safeUser.put("email", user.getEmail());
             safeUser.put("role", user.getRole() != null ? user.getRole().name() : "USER");
             
-            // 👇 FIX: isVerified() cha getVerified() kela! 👇
             safeUser.put("verified", user.getVerified()); 
             
+            // 👇 NEW: Gov ID लिंक ॲडमिन डॅशबोर्डला पाठवा 👇
+            safeUser.put("govIdUrl", user.getGovIdUrl());
+
             safeUser.put("createdAt", user.getCreatedAt());
             return safeUser;
         }).collect(Collectors.toList());
@@ -76,7 +78,7 @@ public class UserController {
         return ResponseEntity.ok(savedUser);
     }
 
-    // 👈 🟢 VIP FIX: User chi profile update karnyasti (Sagle fields add kele) 🟢
+    // User chi profile update karnyasti (Sagle fields add kele)
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUserProfile(@PathVariable String id, @RequestBody User updatedUser) {
         System.out.println("====== PROFILE UPDATE REQUEST AALI (ID: " + id + ") ======");
@@ -89,10 +91,13 @@ public class UserController {
             if (updatedUser.getBio() != null) existingUser.setBio(updatedUser.getBio());
             if (updatedUser.getAvatar() != null) existingUser.setAvatar(updatedUser.getAvatar());
             
-            // 👈 MISSING FIELDS FIX KELA: City, Region, Country
+            // Missing fields fix
             if (updatedUser.getCity() != null) existingUser.setCity(updatedUser.getCity());
             if (updatedUser.getRegion() != null) existingUser.setRegion(updatedUser.getRegion());
             if (updatedUser.getCountry() != null) existingUser.setCountry(updatedUser.getCountry());
+            
+            // 👇 NEW: Gov ID अपडेट करा 👇
+            if (updatedUser.getGovIdUrl() != null) existingUser.setGovIdUrl(updatedUser.getGovIdUrl());
             
             // DB Madhe Save Maar!
             User savedUser = userRepository.save(existingUser);
@@ -124,7 +129,6 @@ public class UserController {
     // 2. FAVORITES (SAVED PROPERTIES) APIs
     // ==========================================
 
-    // Property Save Karnyasti (Heart click)
     @PostMapping("/{userId}/favorites/{propertyId}")
     @Transactional 
     public ResponseEntity<Void> addFavorite(@PathVariable String userId, @PathVariable String propertyId) {
@@ -137,7 +141,6 @@ public class UserController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    // Property Remove Karnyasti (Heart unclick)
     @DeleteMapping("/{userId}/favorites/{propertyId}")
     @Transactional 
     public ResponseEntity<Void> removeFavorite(@PathVariable String userId, @PathVariable String propertyId) {
@@ -150,7 +153,6 @@ public class UserController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    // Eka User chya saglya saved properties che FAKT IDs pathvne 
     @GetMapping("/{userId}/favorites")
     public ResponseEntity<List<String>> getFavorites(@PathVariable String userId) {
         return userRepository.findById(userId)
@@ -163,7 +165,6 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Eka User chya saglya saved properties che FULL DETAILS pathvne (Saved Page sathi)
     @GetMapping("/{id}/favorites-details")
     public ResponseEntity<List<Property>> getFavoritePropertyDetails(@PathVariable String id) {
         User user = userRepository.findById(id).orElse(null);
