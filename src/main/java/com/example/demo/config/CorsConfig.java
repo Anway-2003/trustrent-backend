@@ -1,4 +1,4 @@
-package com.example.demo.config; // 👈 ही लाईन ॲड केली आहे
+package com.example.demo.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,8 +14,9 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // सर्व API ला परवानगी देतो
-                        .allowedOrigins("http://localhost:3000", "https://trustrent-frontend.vercel.app") // तुझी Vercel ची लिंक
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedOrigins("http://localhost:3000", "https://trustrent-frontend.vercel.app") 
+                        // 👇 इथे आपण PATCH ॲड केलं आहे 👇
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH") 
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }

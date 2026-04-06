@@ -63,7 +63,7 @@ public class AuthController {
             }
             
             user.setAvatar(image);
-            user.setVerified(true); 
+            user.setVerified(false);  // ✅ 👈 इथे FIX केला आहे! आता ॲडमिन verify करेल.
             user.setRole(null); // Role survatila null theva, user select karel
             
             userRepository.save(user);
@@ -105,7 +105,7 @@ public class AuthController {
         }
     }
 
-    // 👈 🟢 VIP FIX: नवीन API जो Role डेटाबेसमध्ये सेव्ह करेल (String वापरून फिक्स केला) 🟢
+    
     @PostMapping("/update-role")
     public ResponseEntity<?> updateRole(@RequestBody Map<String, String> request) {
         String email = request.get("email");
@@ -118,18 +118,18 @@ public class AuthController {
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             
-            // 👈 FIX: आता आपण डायरेक्ट String व्हॅल्यू पास करत आहोत
+            
             if ("LANDLORD".equalsIgnoreCase(roleStr)) {
                 user.setRole("LANDLORD");
             } else if ("TENANT".equalsIgnoreCase(roleStr)) {
                 user.setRole("TENANT");
             }
 
-            // डेटाबेसमध्ये सेव्ह करा
+            
             userRepository.save(user);
             System.out.println("✅ Role updated successfully!");
 
-            // अपडेटेड युजर डेटा Frontend ला परत पाठवा
+            
             return ResponseEntity.ok(convertToSafeMap(user));
         }
 
