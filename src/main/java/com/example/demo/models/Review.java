@@ -1,6 +1,6 @@
-package com.example.demo.models; // <-- Package Fix Kela
+package com.example.demo.models; 
 
-import java.time.LocalDateTime; // <-- Import Fix Kela
+import java.time.LocalDateTime; 
 
 import com.example.demo.enums.ReviewType;
 
@@ -18,13 +18,11 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import lombok.Data;
 
 @Entity
 @Table(name = "reviews", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"giver_id", "receiver_id", "type"})
 })
-@Data
 public class Review {
 
     @Id
@@ -47,6 +45,9 @@ public class Review {
     @Enumerated(EnumType.STRING)
     private ReviewType type;
 
+    @Column(name = "is_approved")
+    private Boolean isApproved = false;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -57,4 +58,35 @@ public class Review {
     protected void onCreate() { createdAt = LocalDateTime.now(); updatedAt = LocalDateTime.now(); }
     @PreUpdate
     protected void onUpdate() { updatedAt = LocalDateTime.now(); }
+    
+    // ========================================================
+    // 👇 VS Code ला रडण्यापासून थांबवण्यासाठी Manual Getters/Setters 👇
+    // ========================================================
+    
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
+    public User getGiver() { return giver; }
+    public void setGiver(User giver) { this.giver = giver; }
+
+    public User getReceiver() { return receiver; }
+    public void setReceiver(User receiver) { this.receiver = receiver; }
+
+    public Integer getRating() { return rating; }
+    public void setRating(Integer rating) { this.rating = rating; }
+
+    public String getComment() { return comment; }
+    public void setComment(String comment) { this.comment = comment; }
+
+    public ReviewType getType() { return type; }
+    public void setType(ReviewType type) { this.type = type; }
+
+    public Boolean getIsApproved() { return isApproved; }
+    public void setIsApproved(Boolean isApproved) { this.isApproved = isApproved; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

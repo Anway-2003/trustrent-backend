@@ -101,7 +101,15 @@ public class User {
     public String getCountry() { return country; }
     public void setCountry(String country) { this.country = country; }
 
-    // 👇 Lombok चा एरर येऊ नये म्हणून Gov ID च्या Custom Methods 👇
+    // Lombok चा एरर येऊ नये म्हणून Gov ID च्या Custom Methods
     public String getGovIdUrl() { return govIdUrl; }
     public void setGovIdUrl(String govIdUrl) { this.govIdUrl = govIdUrl; }
+
+    // ========================================================
+    // 👇 VS Code ला रडण्यापासून थांबवण्यासाठी Manual Getters 👇
+    // ========================================================
+    public String getFirstName() { return firstName; }
+    public String getLastName() { return lastName; }
+    public String getAvatar() { return avatar; }
+    public UserRole getRole() { return role; }
 }
